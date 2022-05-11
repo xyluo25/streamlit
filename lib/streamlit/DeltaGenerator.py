@@ -173,9 +173,9 @@ def _set_widget_id(widget_type, element, user_key=None):
     """
     element_hash = hash(element.SerializeToString())
     if user_key is not None:
-        widget_id = "%s-%s" % (user_key, element_hash)
+        widget_id = f"{user_key}-{element_hash}"
     else:
-        widget_id = "%s" % element_hash
+        widget_id = f"{element_hash}"
 
     ctx = get_report_ctx()
     if ctx is not None:
@@ -213,8 +213,7 @@ def _get_widget_ui_value(widget_type, element, user_key=None):
     _set_widget_id(widget_type, element, user_key)
     el = getattr(element, widget_type)
     ctx = get_report_ctx()
-    ui_value = ctx.widgets.get_widget_value(el.id) if ctx else None
-    return ui_value
+    return ctx.widgets.get_widget_value(el.id) if ctx else None
 
 
 def _get_pandas_index_attr(data, attr):
@@ -626,7 +625,7 @@ class DeltaGenerator(object):
            height: 100px
 
         """
-        element.markdown.body = "# %s" % _clean_text(body)
+        element.markdown.body = f"# {_clean_text(body)}"
 
     @_with_element
     def header(self, element, body):
@@ -646,7 +645,7 @@ class DeltaGenerator(object):
            height: 100px
 
         """
-        element.markdown.body = "## %s" % _clean_text(body)
+        element.markdown.body = f"## {_clean_text(body)}"
 
     @_with_element
     def subheader(self, element, body):
@@ -666,7 +665,7 @@ class DeltaGenerator(object):
            height: 100px
 
         """
-        element.markdown.body = "### %s" % _clean_text(body)
+        element.markdown.body = f"### {_clean_text(body)}"
 
     @_with_element
     def error(self, element, body):
@@ -1592,8 +1591,7 @@ class DeltaGenerator(object):
         element.button.default = False
 
         ui_value = _get_widget_ui_value("button", element, user_key=key)
-        current_value = ui_value if ui_value is not None else False
-        return current_value
+        return ui_value if ui_value is not None else False
 
     @_with_element
     def checkbox(self, element, label, value=False, key=None):
@@ -1746,8 +1744,9 @@ class DeltaGenerator(object):
         """
         if not isinstance(index, int):
             raise StreamlitAPIException(
-                "Radio Value has invalid type: %s" % type(index).__name__
+                f"Radio Value has invalid type: {type(index).__name__}"
             )
+
 
         if len(options) > 0 and not 0 <= index < len(options):
             raise StreamlitAPIException(
@@ -1805,8 +1804,9 @@ class DeltaGenerator(object):
         """
         if not isinstance(index, int):
             raise StreamlitAPIException(
-                "Selectbox Value has invalid type: %s" % type(index).__name__
+                f"Selectbox Value has invalid type: {type(index).__name__}"
             )
+
 
         if len(options) > 0 and not 0 <= index < len(options):
             raise StreamlitAPIException(
@@ -1988,13 +1988,8 @@ class DeltaGenerator(object):
         except JSNumberBoundsException as e:
             raise StreamlitAPIException(str(e))
 
-        # Set format default.
         if format is None:
-            if all_ints:
-                format = "%d"
-            else:
-                format = "%0.2f"
-
+            format = "%d" if all_ints else "%0.2f"
         # It would be great if we could guess the number of decimal places from
         # the `step` argument, but this would only be meaningful if step were a
         # decimal. As a possible improvement we could make this function accept
@@ -2082,14 +2077,7 @@ class DeltaGenerator(object):
             return NoValue
 
         if encoding == "auto":
-            if is_binary_string(data):
-                encoding = None
-            else:
-                # If the file does not look like a pure binary file, assume
-                # it's utf-8. It would be great if we could guess it a little
-                # more smartly here, but it is what it is!
-                encoding = "utf-8"
-
+            encoding = None if is_binary_string(data) else "utf-8"
         if encoding:
             return io.StringIO(data.decode(encoding))
 
@@ -2230,12 +2218,11 @@ class DeltaGenerator(object):
         element.time_input.default = time.strftime(value, "%H:%M")
 
         ui_value = _get_widget_ui_value("time_input", element, user_key=key)
-        current_value = (
+        return (
             datetime.strptime(ui_value, "%H:%M").time()
             if ui_value is not None
             else value
         )
-        return current_value
 
     @_with_element
     def date_input(self, element, label, value=None, key=None):
@@ -2285,12 +2272,11 @@ class DeltaGenerator(object):
         element.date_input.default = date.strftime(value, "%Y/%m/%d")
 
         ui_value = _get_widget_ui_value("date_input", element, user_key=key)
-        current_value = (
+        return (
             datetime.strptime(ui_value, "%Y/%m/%d").date()
             if ui_value is not None
             else value
         )
-        return current_value
 
     @_with_element
     def number_input(
@@ -2346,11 +2332,7 @@ class DeltaGenerator(object):
         """
 
         if isinstance(value, NoValue):
-            if min_value:
-                value = min_value
-            else:
-                value = 0.0  # We set a float as default
-
+            value = min_value or 0.0
         int_value = isinstance(value, numbers.Integral)
         float_value = isinstance(value, float)
 
@@ -2358,45 +2340,37 @@ class DeltaGenerator(object):
             raise StreamlitAPIException(
                 "Default value for number_input should be an int or a float."
             )
-        else:
-            if format is None:
-                format = "%d" if int_value else "%0.2f"
+        if format is None:
+            format = "%d" if int_value else "%0.2f"
 
-            if format in ["%d", "%u", "%i"] and float_value:
-                # Warn user to check if displaying float as int was really intended.
-                import streamlit as st
+        if format in ["%d", "%u", "%i"] and float_value:
+            # Warn user to check if displaying float as int was really intended.
+            import streamlit as st
 
-                st.warning(
-                    "Warning: NumberInput value below is float, but format {} displays as integer.".format(
-                        format
-                    )
-                )
+            st.warning(
+                f"Warning: NumberInput value below is float, but format {format} displays as integer."
+            )
 
-            if step is None:
-                step = 1 if int_value else 0.01
+
+        if step is None:
+            step = 1 if int_value else 0.01
 
         try:
             float(format % 2)
         except (TypeError, ValueError):
             raise StreamlitAPIException(
-                "Format string for st.number_input contains invalid characters: %s"
-                % format
+                f"Format string for st.number_input contains invalid characters: {format}"
             )
+
 
         # Ensure that all arguments are of the same type.
         args = [min_value, max_value, step]
 
         int_args = all(
-            map(
-                lambda a: (
-                    isinstance(a, numbers.Integral) or isinstance(a, type(None))
-                ),
-                args,
-            )
+            map(lambda a: isinstance(a, (numbers.Integral, type(None))), args)
         )
-        float_args = all(
-            map(lambda a: (isinstance(a, float) or isinstance(a, type(None))), args)
-        )
+
+        float_args = all(map(lambda a: isinstance(a, (float, type(None))), args))
 
         if not int_args and not float_args:
             raise StreamlitAPIException(
@@ -2522,9 +2496,7 @@ class DeltaGenerator(object):
                     "Progress Value has invalid value [0, 100]: %d" % value
                 )
         else:
-            raise StreamlitAPIException(
-                "Progress Value has invalid type: %s" % value_type
-            )
+            raise StreamlitAPIException(f"Progress Value has invalid type: {value_type}")
 
     @_with_element
     def empty(self, element):

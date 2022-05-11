@@ -63,9 +63,7 @@ def _get_failing_lines(code, lineno):
 
     start = lineno - source_lineno
     end = min(start + 3, len(source_lines))
-    lines = source_lines[start:end]
-
-    return lines
+    return source_lines[start:end]
 
 
 def get_referenced_objects(code, context):

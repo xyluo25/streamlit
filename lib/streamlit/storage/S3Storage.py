@@ -67,15 +67,14 @@ class S3Storage(AbstractStorage):
         # URL where browsers go to load the Streamlit web app.
         self._web_app_url = None
 
-        if not self._url:
-            self._web_app_url = os.path.join(
-                "https://%s.%s" % (self._bucketname, "s3.amazonaws.com"),
+        self._web_app_url = (
+            os.path.join(self._url, self._s3_key("index.html", add_prefix=False))
+            if self._url
+            else os.path.join(
+                f"https://{self._bucketname}.s3.amazonaws.com",
                 self._s3_key("index.html"),
             )
-        else:
-            self._web_app_url = os.path.join(
-                self._url, self._s3_key("index.html", add_prefix=False)
-            )
+        )
 
         aws_profile = config.get_option("s3.profile")
         access_key_id = config.get_option("s3.accessKeyId")
@@ -188,7 +187,7 @@ class S3Storage(AbstractStorage):
 
         yield self._s3_upload_files(files_to_upload, progress_coroutine)
 
-        raise gen.Return("%s?id=%s" % (self._web_app_url, report_id))
+        raise gen.Return(f"{self._web_app_url}?id={report_id}")
 
     @gen.coroutine
     def _s3_upload_files(self, files, progress_coroutine):

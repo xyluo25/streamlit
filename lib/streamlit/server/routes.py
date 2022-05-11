@@ -70,19 +70,20 @@ class MediaFileHandler(tornado.web.RequestHandler):
         # Filename is {requested_hash}.{extension} but MediaFileManager
         # is indexed by requested_hash.
         requested_hash = filename.split(".")[0]
-        LOGGER.debug("MediaFileHandler: GET %s" % filename)
+        LOGGER.debug(f"MediaFileHandler: GET {filename}")
 
         try:
             media = media_file_manager.get(requested_hash)
         except:
-            LOGGER.error("MediaFileManager: Missing file %s" % requested_hash)
-            self.write("%s not found" % requested_hash)
+            LOGGER.error(f"MediaFileManager: Missing file {requested_hash}")
+            self.write(f"{requested_hash} not found")
             self.set_status(404)
             return
 
         LOGGER.debug(
-            "MediaFileManager: Sending %s file %s" % (media.mimetype, requested_hash)
+            f"MediaFileManager: Sending {media.mimetype} file {requested_hash}"
         )
+
         self.write(media.content)
         self.set_header("Content-Type:", media.mimetype)
         self.set_status(200)
@@ -157,7 +158,7 @@ class DebugHandler(_SpecialRequestHandler):
     def get(self):
         self.add_header("Cache-Control", "no-cache")
         self.write(
-            "<code><pre>%s</pre><code>" % json.dumps(self._server.get_debug(), indent=2)
+            f"<code><pre>{json.dumps(self._server.get_debug(), indent=2)}</pre><code>"
         )
 
 
@@ -198,7 +199,7 @@ class MessageCacheHandler(tornado.web.RequestHandler):
             self.set_status(404)
             raise tornado.web.Finish()
 
-        LOGGER.debug("MessageCache HIT [hash=%s]" % msg_hash)
+        LOGGER.debug(f"MessageCache HIT [hash={msg_hash}]")
         msg_str = serialize_forward_msg(message)
         self.set_header("Content-Type", "application/octet-stream")
         self.write(msg_str)

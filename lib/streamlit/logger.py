@@ -36,15 +36,15 @@ def set_log_level(level):
 
     if isinstance(level, str):
         level = level.upper()
-    if level == "CRITICAL" or level == logging.CRITICAL:
+    if level in ["CRITICAL", logging.CRITICAL]:
         log_level = logging.CRITICAL
-    elif level == "ERROR" or level == logging.ERROR:
+    elif level in ["ERROR", logging.ERROR]:
         log_level = logging.ERROR
-    elif level == "WARNING" or level == logging.WARNING:
+    elif level in ["WARNING", logging.WARNING]:
         log_level = logging.WARNING
-    elif level == "INFO" or level == logging.INFO:
+    elif level in ["INFO", logging.INFO]:
         log_level = logging.INFO
-    elif level == "DEBUG" or level == logging.DEBUG:
+    elif level in ["DEBUG", logging.DEBUG]:
         log_level = logging.DEBUG
     else:
         msg = 'undefined log level "%s"' % level
@@ -85,7 +85,7 @@ def init_tornado_logs():
     # http://www.tornadoweb.org/en/stable/log.html
     logs = ["access", "application", "general"]
     for log in logs:
-        name = "tornado.%s" % log
+        name = f"tornado.{log}"
         get_logger(name)
 
     logger = get_logger(__name__)
@@ -108,11 +108,7 @@ def get_logger(name):
     if name in LOGGERS.keys():
         return LOGGERS[name]
 
-    if name == "root":
-        logger = logging.getLogger()
-    else:
-        logger = logging.getLogger(name)
-
+    logger = logging.getLogger() if name == "root" else logging.getLogger(name)
     logger.setLevel(LOG_LEVEL)
     logger.propagate = False
     setup_formatter(logger)

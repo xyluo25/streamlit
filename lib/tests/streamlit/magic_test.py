@@ -36,18 +36,15 @@ class MagicTest(unittest.TestCase):
         if is_python_2:
             return
         tree = magic.add_magic(code, "./")
-        count = 0
-        for node in ast.walk(tree):
-            # count the nodes where a substitution has been made, i.e.
-            # look for 'calls' to a 'streamlit' function
-            if type(node) is ast.Call and "streamlit" in ast.dump(node.func):
-                count += 1
+        count = sum(
+            type(node) is ast.Call and "streamlit" in ast.dump(node.func)
+            for node in ast.walk(tree)
+        )
+
         self.assertEqual(
             expected_count,
             count,
-            ("There must be exactly {} streamlit nodes, but found {}").format(
-                expected_count, count
-            ),
+            f"There must be exactly {expected_count} streamlit nodes, but found {count}",
         )
 
     def test_simple_statement(self):

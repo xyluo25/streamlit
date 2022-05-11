@@ -15,6 +15,7 @@
 
 """Unit tests for MediaFileManager"""
 
+
 import unittest
 
 from streamlit.MediaFileManager import MediaFileManager
@@ -62,10 +63,7 @@ IMAGE_FIXTURES = {
     },
 }
 
-ALL_FIXTURES = dict()
-ALL_FIXTURES.update(AUDIO_FIXTURES)
-ALL_FIXTURES.update(VIDEO_FIXTURES)
-ALL_FIXTURES.update(IMAGE_FIXTURES)
+ALL_FIXTURES = AUDIO_FIXTURES | VIDEO_FIXTURES | IMAGE_FIXTURES
 
 
 class UploadedFileManagerTest(unittest.TestCase):

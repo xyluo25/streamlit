@@ -35,7 +35,7 @@ def marshall(proto, spec=None, **kwargs):
     data = []  # type: List[Any]
 
     if spec is None:
-        spec = dict()
+        spec = {}
 
     # Merge spec with unflattened kwargs, where kwargs take precedence.
     # This only works for string keys, but kwarg keys are strings anyways.

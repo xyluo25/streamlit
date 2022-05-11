@@ -30,7 +30,7 @@ import streamlit as st
 release = st.__version__
 
 # The short X.Y version
-version = ".".join(st.__version__.split(".")[0:2])
+version = ".".join(st.__version__.split(".")[:2])
 
 
 # -- General configuration ---------------------------------------------------

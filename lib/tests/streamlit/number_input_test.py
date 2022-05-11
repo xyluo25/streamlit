@@ -116,9 +116,9 @@ class NumberInputTest(testutil.DeltaGeneratorTestCase):
         #       See https://github.com/streamlit/streamlit/pull/943
         SUPPORTED = "difFeEgGu"
         for char in SUPPORTED:
-            st.number_input("any label", format="%" + char)
+            st.number_input("any label", format=f"%{char}")
             c = self.get_delta_from_queue().new_element.number_input
-            self.assertEqual(c.format, "%" + char)
+            self.assertEqual(c.format, f"%{char}")
 
     def test_error_on_unsupported_formatters(self):
         # note: The slightly-problematic %a, %X, %x, and %o have different effects in
@@ -128,7 +128,7 @@ class NumberInputTest(testutil.DeltaGeneratorTestCase):
         UNSUPPORTED = "pAn"
         for char in UNSUPPORTED:
             with pytest.raises(StreamlitAPIException) as exc_message:
-                st.number_input("any label", value=3.14, format="%" + char)
+                st.number_input("any label", value=3.14, format=f"%{char}")
 
     def test_error_on_invalid_formats(self):
         BAD_FORMATS = [
@@ -147,29 +147,27 @@ class NumberInputTest(testutil.DeltaGeneratorTestCase):
             value = JSNumber.MAX_SAFE_INTEGER + 1
             st.number_input("Label", value=value)
         self.assertEqual(
-            "`value` (%s) must be <= (1 << 53) - 1" % str(value), str(exc.value)
+            f"`value` ({str(value)}) must be <= (1 << 53) - 1", str(exc.value)
         )
+
 
         # Min int
         with pytest.raises(StreamlitAPIException) as exc:
             value = JSNumber.MIN_SAFE_INTEGER - 1
             st.number_input("Label", value=value)
         self.assertEqual(
-            "`value` (%s) must be >= -((1 << 53) - 1)" % str(value), str(exc.value)
+            f"`value` ({str(value)}) must be >= -((1 << 53) - 1)", str(exc.value)
         )
+
 
         # Max float
         with pytest.raises(StreamlitAPIException) as exc:
             value = 2e308
             st.number_input("Label", value=value)
-        self.assertEqual(
-            "`value` (%s) must be <= 1.797e+308" % str(value), str(exc.value)
-        )
+        self.assertEqual(f"`value` ({value}) must be <= 1.797e+308", str(exc.value))
 
         # Min float
         with pytest.raises(StreamlitAPIException) as exc:
             value = -2e308
             st.number_input("Label", value=value)
-        self.assertEqual(
-            "`value` (%s) must be >= -1.797e+308" % str(value), str(exc.value)
-        )
+        self.assertEqual(f"`value` ({value}) must be >= -1.797e+308", str(exc.value))

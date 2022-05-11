@@ -70,17 +70,13 @@ def streamlit_write(path, binary=False):
     if binary:
         mode += "b"
     path = get_streamlit_file_path(path)
-    try:
+    with contextlib.suppress(Exception):
         os.makedirs(os.path.dirname(path))
-    except Exception:
-        # Python 3 supports exist_ok=True which avoids the try/except,
-        # but Python 2 does not.
-        pass
     try:
         with open(path, mode) as handle:
             yield handle
     except OSError as e:
-        msg = ["Unable to write file: %s" % os.path.abspath(path)]
+        msg = [f"Unable to write file: {os.path.abspath(path)}"]
         if e.errno == errno.EINVAL and env_util.IS_DARWIN:
             msg.append(
                 "Python is limited to files below 2GB on OSX. "
@@ -130,12 +126,8 @@ def file_is_in_folder_glob(filepath, folderpath_glob):
     # Make the glob always end with "/*" so we match files inside subfolders of
     # folderpath_glob.
     if not folderpath_glob.endswith("*"):
-        if folderpath_glob.endswith("/"):
-            folderpath_glob += "*"
-        else:
-            folderpath_glob += "/*"
-
-    file_dir = os.path.dirname(filepath) + "/"
+        folderpath_glob += "*" if folderpath_glob.endswith("/") else "/*"
+    file_dir = f"{os.path.dirname(filepath)}/"
     return fnmatch.fnmatch(file_dir, folderpath_glob)
 
 

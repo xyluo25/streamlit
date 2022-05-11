@@ -96,7 +96,7 @@ class UploadFileRequestHandler(tornado.web.RequestHandler):
         )
 
         if len(files) != 1:
-            self.send_error(400, reason="Expected 1 file, but got %s" % len(files))
+            self.send_error(400, reason=f"Expected 1 file, but got {len(files)}")
             return
 
         # Grab the first file entry. Because multiple files with the same
@@ -104,7 +104,7 @@ class UploadFileRequestHandler(tornado.web.RequestHandler):
         # there's only one in there as well.
         file_list = list(files.values())[0]
         if len(file_list) != 1:
-            self.send_error(400, reason="Expected 1 file, but got %s" % len(file_list))
+            self.send_error(400, reason=f"Expected 1 file, but got {len(file_list)}")
             return
 
         file = file_list[0]

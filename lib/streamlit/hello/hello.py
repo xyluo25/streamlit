@@ -85,13 +85,12 @@ def run():
         st.write("# Welcome to Streamlit! 👋")
     else:
         show_code = st.sidebar.checkbox("Show code", True)
-        st.markdown("# %s" % demo_name)
-        description = DEMOS[demo_name][1]
-        if description:
+        st.markdown(f"# {demo_name}")
+        if description := DEMOS[demo_name][1]:
             st.write(description)
         # Clear everything from the intro page.
         # We only have 4 elements in the page so this is intentional overkill.
-        for i in range(10):
+        for _ in range(10):
             st.empty()
 
     demo()

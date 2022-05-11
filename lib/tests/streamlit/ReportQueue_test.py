@@ -145,7 +145,7 @@ class ReportQueueTest(unittest.TestCase):
         rq.enqueue(INIT_MSG)
 
         # Simulate rerun
-        for i in range(2):
+        for _ in range(2):
             TEXT_DELTA_MSG1.metadata.delta_id = 0
             rq.enqueue(TEXT_DELTA_MSG1)
 

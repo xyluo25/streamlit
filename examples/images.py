@@ -104,7 +104,7 @@ class StreamlitImages(object):
                 i = i.convert("RGB")
             data = io.BytesIO()
             i.save(data, format=fmt.upper())
-            self._data["image.%s" % fmt] = data.getvalue()
+            self._data[f"image.{fmt}"] = data.getvalue()
 
     def generate_image_channel_data(self):
         # np.array(image) returns the following shape
@@ -116,11 +116,11 @@ class StreamlitImages(object):
         # single channels easier.
         array = np.array(self._image).transpose((2, 0, 1))
 
-        for idx, name in zip(range(0, 4), ["red", "green", "blue", "alpha"]):
+        for idx, name in zip(range(4), ["red", "green", "blue", "alpha"]):
             data = io.BytesIO()
             img = Image.fromarray(array[idx].astype(np.uint8))
             img.save(data, format="PNG")
-            self._data["%s.png" % name] = data.getvalue()
+            self._data[f"{name}.png"] = data.getvalue()
 
     def generate_bgra_image(self):
         # Split Images and rearrange
@@ -145,7 +145,7 @@ class StreamlitImages(object):
 
         # Make ten frames with the circle of a random size and location
         random.seed(0)
-        for i in range(0, 10):
+        for _ in range(10):
             frame = im.copy()
             draw = ImageDraw.Draw(frame)
             pos = (random.randrange(0, self._size), random.randrange(0, self._size))
@@ -168,9 +168,9 @@ class StreamlitImages(object):
 
     def generate_pseudorandom_image(self):
         w, h = self._size, self._size
-        r = np.array([255 * np.sin(x / w * 2 * np.pi) for x in range(0, w)])
-        g = np.array([255 * np.cos(x / w * 2 * np.pi) for x in range(0, w)])
-        b = np.array([255 * np.tan(x / w * 2 * np.pi) for x in range(0, w)])
+        r = np.array([255 * np.sin(x / w * 2 * np.pi) for x in range(w)])
+        g = np.array([255 * np.cos(x / w * 2 * np.pi) for x in range(w)])
+        b = np.array([255 * np.tan(x / w * 2 * np.pi) for x in range(w)])
 
         r = np.tile(r, h).reshape(w, h).astype("uint8")
         g = np.tile(g, h).reshape(w, h).astype("uint8")
@@ -195,7 +195,7 @@ class StreamlitImages(object):
 
     def save(self):
         for name, data in self._data.items():
-            Image.open(io.BytesIO(data)).save("/tmp/%s" % name)
+            Image.open(io.BytesIO(data)).save(f"/tmp/{name}")
 
     def get_images(self):
         return self._data
@@ -226,9 +226,14 @@ data = []
 image = Image.open(io.BytesIO(si.get_images()["image.png"]))
 data.append((image, "PIL Image.open('image.png')"))
 image = Image.open(io.BytesIO(si.get_images()["image.jpeg"]))
-data.append((image, "PIL Image.open('image.jpeg')"))
-data.append(
-    (Image.new("RGB", (200, 200), color="red"), "Image.new('RGB', color='red')")
+data.extend(
+    (
+        (image, "PIL Image.open('image.jpeg')"),
+        (
+            Image.new("RGB", (200, 200), color="red"),
+            "Image.new('RGB', color='red')",
+        ),
+    )
 )
 
 images = []
@@ -252,15 +257,15 @@ st.header("Numpy arrays")
 image = Image.open(io.BytesIO(si.get_images()["image.png"]))
 rgba = np.array(image)
 
-data = []
-# Full RGBA image
-data.append((rgba, str(rgba.shape)))
-# Select second channel
-data.append((rgba[:, :, 1], str(rgba[:, :, 1].shape)))
-# Make it x, y, 1
-data.append(
-    (np.expand_dims(rgba[:, :, 2], 2), str(np.expand_dims(rgba[:, :, 2], 2).shape))
-)
+data = [
+    (rgba, str(rgba.shape)),
+    (rgba[:, :, 1], str(rgba[:, :, 1].shape)),
+    (
+        np.expand_dims(rgba[:, :, 2], 2),
+        str(np.expand_dims(rgba[:, :, 2], 2).shape),
+    ),
+]
+
 # Drop alpha channel
 data.append((rgba[:, :, :3], str(rgba[:, :, :3].shape)))
 

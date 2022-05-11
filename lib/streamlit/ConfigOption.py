@@ -142,7 +142,7 @@ class ConfigOption(object):
         key_format = r"(?P<section>\_?[a-z][a-z0-9]*)\.(?P<name>[a-z][a-zA-Z0-9]*)$"
         match = re.match(key_format, self.key)
         assert match, 'Key "%s" has invalid format.' % self.key
-        self.section, self.name = match.group("section"), match.group("name")
+        self.section, self.name = match["section"], match["name"]
 
         self.description = description
 
@@ -158,7 +158,7 @@ class ConfigOption(object):
         if self.replaced_by:
             self.deprecated = True
             if deprecation_text is None:
-                deprecation_text = "Replaced by %s." % self.replaced_by
+                deprecation_text = f"Replaced by {self.replaced_by}."
 
         if self.deprecated:
             assert expiration_date, "expiration_date is required for deprecated items"
@@ -195,9 +195,7 @@ class ConfigOption(object):
     @property
     def value(self) -> Any:
         """Get the value of this config option."""
-        if self._get_val_func is None:
-            return None
-        return self._get_val_func()
+        return None if self._get_val_func is None else self._get_val_func()
 
     def set_value(self, value, where_defined=None):
         """Set the value of this option.

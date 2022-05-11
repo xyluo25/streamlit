@@ -95,12 +95,7 @@ class ScriptRequestQueue(object):
                             request,
                             RerunData(widget_state=data.widget_state),
                         )
-                    elif data.widget_state is None:
-                        # If this request's widget_state is None, and the
-                        # existing request's widget_state was not, this
-                        # new request is entirely redundant and can be dropped.
-                        pass
-                    else:
+                    elif data.widget_state is not None:
                         # Both the existing and the new request have
                         # non-null widget_states. Merge them together.
                         coalesced_state = coalesce_widget_states(
@@ -125,10 +120,7 @@ class ScriptRequestQueue(object):
         A (ScriptRequest, Data) tuple.
         """
         with self._lock:
-            if len(self._queue) > 0:
-                return self._queue.popleft()
-            else:
-                return None, None
+            return self._queue.popleft() if len(self._queue) > 0 else (None, None)
 
 
 def _index_if(collection, pred):
@@ -136,7 +128,7 @@ def _index_if(collection, pred):
 
     Returns the index, or -1 if no such item exists.
     """
-    for index, element in enumerate(collection):
-        if pred(element):
-            return index
-    return -1
+    return next(
+        (index for index, element in enumerate(collection) if pred(element)),
+        -1,
+    )

@@ -95,7 +95,7 @@ class HashTest(unittest.TestCase):
         self.assertNotEqual(get_hash((1,)), get_hash([1]))
 
     def test_dict(self):
-        dict_gen = {1: (x for x in range(1))}
+        dict_gen = {1: iter(range(1))}
 
         self.assertEqual(get_hash({1: 1}), get_hash({1: 1}))
         self.assertNotEqual(get_hash({1: 1}), get_hash({1: 2}))
@@ -116,7 +116,7 @@ class HashTest(unittest.TestCase):
 
         class C(object):
             def __init__(self):
-                self.x = (x for x in range(1))
+                self.x = iter(range(1))
 
         self.assertEqual(get_hash(A()), get_hash(A()))
         self.assertNotEqual(get_hash(A()), get_hash(B()))
@@ -128,7 +128,7 @@ class HashTest(unittest.TestCase):
 
     def test_generator(self):
         with self.assertRaises(UnhashableType):
-            get_hash((x for x in range(1)))
+            get_hash(iter(range(1)))
 
     def test_hashing_broken_code(self):
         import datetime
@@ -137,10 +137,9 @@ class HashTest(unittest.TestCase):
             return datetime.strptime("%H")
 
         def b():
-            x = datetime.strptime("%H")
             ""
             ""
-            return x
+            return datetime.strptime("%H")
 
         data = [
             (a, '```\nreturn datetime.strptime("%H")\n```'),
@@ -348,16 +347,13 @@ class CodeHashTest(unittest.TestCase):
         """Test the hash of functions with values."""
 
         def f():
-            x = 42
-            return x
+            return 42
 
         def g():
-            x = 12
-            return x
+            return 12
 
         def h():
-            y = 42
-            return y
+            return 42
 
         self.assertNotEqual(get_hash(f), get_hash(g))
         self.assertEqual(get_hash(f), get_hash(h))

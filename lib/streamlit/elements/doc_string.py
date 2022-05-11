@@ -43,10 +43,6 @@ def marshall(proto, obj):
         proto.doc_string.module = "streamlit"
     elif module_name is not None:
         proto.doc_string.module = module_name
-    else:
-        # Leave proto.doc_string.module as an empty string (default value).
-        pass
-
     obj_type = type(obj)
     proto.doc_string.type = str(obj_type)
 

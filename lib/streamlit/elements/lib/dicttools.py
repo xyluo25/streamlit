@@ -55,7 +55,7 @@ def _unflatten_single_dict(flat_dict):
         A tree made of dicts inside of dicts.
 
     """
-    out = dict()  # type: Dict[str, Any]
+    out = {}
     for pathstr, v in flat_dict.items():
         path = pathstr.split("_")
 
@@ -64,7 +64,7 @@ def _unflatten_single_dict(flat_dict):
 
         for k in path:
             if k not in curr_dict:
-                curr_dict[k] = dict()
+                curr_dict[k] = {}
             prev_dict = curr_dict
             curr_dict = curr_dict[k]
 
@@ -129,7 +129,7 @@ def unflatten(flat_dict, encodings=None):
         # Move items into 'encoding' if needed:
         if k in encodings:
             if "encoding" not in out_dict:
-                out_dict["encoding"] = dict()
+                out_dict["encoding"] = {}
             out_dict["encoding"][k] = v
             out_dict.pop(k)
 

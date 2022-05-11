@@ -224,7 +224,7 @@ class CredentialsClassTest(unittest.TestCase):
                 c.activate()
             self.assertEqual(p.error.call_count, 2)
             self.assertEqual(
-                str(p.error.call_args_list[1])[0:27], "call('Activation not valid."
+                str(p.error.call_args_list[1])[:27], "call('Activation not valid."
             )
 
     @patch("streamlit.credentials.file_util.get_streamlit_file_path", mock_get_path)

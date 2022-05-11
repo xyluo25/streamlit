@@ -55,7 +55,7 @@ class Report(object):
         base_path = config.get_option("server.baseUrlPath").strip("/")
 
         if base_path:
-            base_path = "/" + base_path
+            base_path = f"/{base_path}"
 
         return "http://%(host_ip)s:%(port)s%(base_path)s" % {
             "host_ip": host_ip.strip("/"),
@@ -154,7 +154,7 @@ class Report(object):
         )
 
         return [
-            ("reports/%s/manifest.pb" % self.report_id, manifest.SerializeToString())
+            (f"reports/{self.report_id}/manifest.pb", manifest.SerializeToString())
         ]
 
     def serialize_final_report_to_files(self):
@@ -260,7 +260,7 @@ def _should_save_report_msg(msg):
     """
 
     msg_type = msg.WhichOneof("type")
-    return msg_type == "initialize" or msg_type == "new_report" or msg_type == "delta"
+    return msg_type in ["initialize", "new_report", "delta"]
 
 
 def _get_browser_address_bar_port():

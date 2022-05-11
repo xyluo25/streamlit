@@ -66,14 +66,15 @@ class JSNumber(object):
             value_name = "value"
 
         if not isinstance(value, numbers.Integral):
-            raise JSNumberBoundsException("%s (%s) is not an int" % (value_name, value))
+            raise JSNumberBoundsException(f"{value_name} ({value}) is not an int")
         elif value < cls.MIN_SAFE_INTEGER:  # type: ignore[misc]
             raise JSNumberBoundsException(
-                "%s (%s) must be >= -((1 << 53) - 1)" % (value_name, value)
+                f"{value_name} ({value}) must be >= -((1 << 53) - 1)"
             )
+
         elif value > cls.MAX_SAFE_INTEGER:
             raise JSNumberBoundsException(
-                "%s (%s) must be <= (1 << 53) - 1" % (value_name, value)
+                f"{value_name} ({value}) must be <= (1 << 53) - 1"
             )
 
     @classmethod
@@ -100,14 +101,8 @@ class JSNumber(object):
             value_name = "value"
 
         if not isinstance(value, (numbers.Integral, float)):
-            raise JSNumberBoundsException(
-                "%s (%s) is not a float" % (value_name, value)
-            )
+            raise JSNumberBoundsException(f"{value_name} ({value}) is not a float")
         elif value < cls.MIN_NEGATIVE_VALUE:
-            raise JSNumberBoundsException(
-                "%s (%s) must be >= -1.797e+308" % (value_name, value)
-            )
+            raise JSNumberBoundsException(f"{value_name} ({value}) must be >= -1.797e+308")
         elif value > cls.MAX_VALUE:
-            raise JSNumberBoundsException(
-                "%s (%s) must be <= 1.797e+308" % (value_name, value)
-            )
+            raise JSNumberBoundsException(f"{value_name} ({value}) must be <= 1.797e+308")

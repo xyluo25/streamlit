@@ -289,12 +289,10 @@ class _FolderEventHandler(events.FileSystemEventHandler):
 
         # Check for both modified and moved files, because many programs write
         # to a backup file then rename (i.e. move) it.
-        if event.event_type == events.EVENT_TYPE_MODIFIED:
-            file_path = event.src_path
-        # On OSX with VI, on save, the file is deleted, the swap file is
-        # modified and then the original file is created hence why we
-        # capture EVENT_TYPE_CREATED
-        elif event.event_type == events.EVENT_TYPE_CREATED:
+        if event.event_type in [
+            events.EVENT_TYPE_MODIFIED,
+            events.EVENT_TYPE_CREATED,
+        ]:
             file_path = event.src_path
         elif event.event_type == events.EVENT_TYPE_MOVED:
             LOGGER.debug("Move event: src %s; dest %s", event.src_path, event.dest_path)

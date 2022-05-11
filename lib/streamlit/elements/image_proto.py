@@ -39,12 +39,9 @@ MAXIMUM_CONTENT_WIDTH = 2 * 730
 
 
 def _image_has_alpha_channel(image):
-    if image.mode in ("RGBA", "LA") or (
+    return image.mode in ("RGBA", "LA") or (
         image.mode == "P" and "transparency" in image.info
-    ):
-        return True
-    else:
-        return False
+    )
 
 
 def _PIL_to_bytes(image, format="JPEG", quality=100):
@@ -77,7 +74,7 @@ def _np_array_to_bytes(array, format="JPEG"):
 
 
 def _4d_to_list_3d(array):
-    return [array[i, :, :, :] for i in range(0, array.shape[0])]
+    return [array[i, :, :, :] for i in range(array.shape[0])]
 
 
 def _verify_np_shape(array):
@@ -101,9 +98,9 @@ def _normalize_to_bytes(data, width, format):
     ext = imghdr.what(None, data)
 
     if format is None:
-        mimetype = mimetypes.guess_type("image.%s" % ext)[0]
+        mimetype = mimetypes.guess_type(f"image.{ext}")[0]
     else:
-        mimetype = "image/" + format
+        mimetype = f"image/{format}"
 
     image = Image.open(io.BytesIO(data))
     actual_width, actual_height = image.size
@@ -111,17 +108,12 @@ def _normalize_to_bytes(data, width, format):
     if width < 0 and actual_width > MAXIMUM_CONTENT_WIDTH:
         width = MAXIMUM_CONTENT_WIDTH
 
-    if width > 0:
-        if actual_width > width:
-            new_height = int(1.0 * actual_height * width / actual_width)
-            image = image.resize((width, new_height))
-            data = _PIL_to_bytes(image, format=format, quality=90)
+    if width > 0 and actual_width > width:
+        new_height = int(1.0 * actual_height * width / actual_width)
+        image = image.resize((width, new_height))
+        data = _PIL_to_bytes(image, format=format, quality=90)
 
-            if format is None:
-                mimetype = "image/png"
-            else:
-                mimetype = "image/" + format
-
+        mimetype = "image/png" if format is None else f"image/{format}"
     return data, mimetype
 
 
@@ -130,16 +122,13 @@ def _clip_image(image, clamp):
     if issubclass(image.dtype.type, np.floating):
         if clamp:
             data = np.clip(image, 0, 1.0)
-        else:
-            if np.amin(image) < 0.0 or np.amax(image) > 1.0:
-                raise RuntimeError("Data is outside [0.0, 1.0] and clamp is not set.")
+        elif np.amin(image) < 0.0 or np.amax(image) > 1.0:
+            raise RuntimeError("Data is outside [0.0, 1.0] and clamp is not set.")
         data = data * 255
-    else:
-        if clamp:
-            data = np.clip(image, 0, 255)
-        else:
-            if np.amin(image) < 0 or np.amax(image) > 255:
-                raise RuntimeError("Data is outside [0, 255] and clamp is not set.")
+    elif clamp:
+        data = np.clip(image, 0, 255)
+    elif np.amin(image) < 0 or np.amax(image) > 255:
+        raise RuntimeError("Data is outside [0, 255] and clamp is not set.")
     return data
 
 
@@ -151,26 +140,21 @@ def marshall_images(
     # Turn single image and caption into one element list.
     if type(image) is list:
         images = image
+    elif type(image) == np.ndarray and len(image.shape) == 4:
+        images = _4d_to_list_3d(image)
     else:
-        if type(image) == np.ndarray and len(image.shape) == 4:
-            images = _4d_to_list_3d(image)
-        else:
-            images = [image]
+        images = [image]
 
     if type(caption) is list:
         captions = caption
+    elif isinstance(caption, str):
+        captions = [caption]
+    elif type(caption) == np.ndarray and len(caption.shape) == 1:
+        captions = caption.tolist()
+    elif caption is None:
+        captions = [None] * len(images)
     else:
-        if isinstance(caption, str):
-            captions = [caption]
-        # You can pass in a 1-D Numpy array as captions.
-        elif type(caption) == np.ndarray and len(caption.shape) == 1:
-            captions = caption.tolist()
-        # If there are no captions then make the captions list the same size
-        # as the images list.
-        elif caption is None:
-            captions = [None] * len(images)
-        else:
-            captions = [str(caption)]
+        captions = [str(caption)]
 
     assert type(captions) == list, "If image is a list then caption should be as well"
     assert len(captions) == len(images), "Cannot pair %d captions with %d images." % (
@@ -185,14 +169,12 @@ def marshall_images(
             proto_img.caption = str(caption)
 
         # PIL Images
-        if isinstance(image, ImageFile.ImageFile) or isinstance(image, Image.Image):
+        if isinstance(image, (ImageFile.ImageFile, Image.Image)):
             data = _PIL_to_bytes(image, format)
 
-        # BytesIO
         elif type(image) is io.BytesIO:
             data = _BytesIO_to_bytes(image)
 
-        # Numpy Arrays (ie opencv)
         elif type(image) is np.ndarray:
             data = _verify_np_shape(image)
             data = _clip_image(data, clamp)
@@ -208,7 +190,6 @@ def marshall_images(
 
             data = _np_array_to_bytes(data, format=format)
 
-        # Strings
         elif isinstance(image, str):
             # If it's a url, then set the protobuf and continue
             try:
@@ -223,7 +204,6 @@ def marshall_images(
             with open(image, "rb") as f:
                 data = f.read()
 
-        # Assume input in bytes.
         else:
             data = image
 

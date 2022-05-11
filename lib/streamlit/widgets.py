@@ -43,10 +43,7 @@ def coalesce_widget_states(old_states, new_states):
         The resulting coalesced protobuf
 
     """
-    states_by_id = {}
-    for new_state in new_states.widgets:
-        states_by_id[new_state.id] = new_state
-
+    states_by_id = {new_state.id: new_state for new_state in new_states.widgets}
     for old_state in old_states.widgets:
         if old_state.WhichOneof("value") == "trigger_value" and old_state.trigger_value:
 
@@ -102,9 +99,7 @@ class Widgets(object):
             A WidgetStates protobuf
 
         """
-        self._state = {}
-        for wstate in widget_states.widgets:
-            self._state[wstate.id] = wstate
+        self._state = {wstate.id: wstate for wstate in widget_states.widgets}
 
     def get_state(self):
         """
@@ -127,10 +122,11 @@ class Widgets(object):
 
         """
         prev_state = self._state
-        self._state = {}
-        for wstate in prev_state.values():
-            if wstate.WhichOneof("value") != "trigger_value":
-                self._state[wstate.id] = wstate
+        self._state = {
+            wstate.id: wstate
+            for wstate in prev_state.values()
+            if wstate.WhichOneof("value") != "trigger_value"
+        }
 
     def set_item(self, key, value):
         self._state[key] = value

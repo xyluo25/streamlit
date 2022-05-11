@@ -42,8 +42,7 @@ class ServerTestCase(tornado.testing.AsyncHTTPTestCase):
         # ioloop when it stops.
         self.server = Server(self.io_loop, "/not/a/script.py", "test command line")
         self.server._on_stopped = mock.MagicMock()  # type: ignore[assignment]
-        app = self.server._create_app()
-        return app
+        return self.server._create_app()
 
     def tearDown(self):
         super(ServerTestCase, self).tearDown()

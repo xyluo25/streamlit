@@ -246,10 +246,7 @@ def _global_log_level():
 
     Default: 'info'
     """
-    if get_option("global.developmentMode"):
-        return "debug"
-    else:
-        return "info"
+    return "debug" if get_option("global.developmentMode") else "info"
 
 
 @_create_option("global.unitTest", visibility="hidden", type_=bool)
@@ -841,7 +838,7 @@ def _maybe_read_env_variable(value):
         env_var = os.environ.get(var_name)
 
         if env_var is None:
-            LOGGER.error("No environment variable called %s" % var_name)
+            LOGGER.error(f"No environment variable called {var_name}")
         else:
             return _maybe_convert_to_number(env_var)
 
@@ -893,8 +890,7 @@ def parse_config_file(force=False):
 
 def _clean_paragraphs(txt):
     paragraphs = txt.split("\n\n")
-    cleaned_paragraphs = [_clean(x) for x in paragraphs]
-    return cleaned_paragraphs
+    return [_clean(x) for x in paragraphs]
 
 
 def _clean(txt):
@@ -947,7 +943,7 @@ def _check_conflicts():
             s3_url = get_option("s3.url")
             parsed = urllib.parse.urlparse(s3_url)
             if parsed.netloc == "":
-                _set_option("s3.url", "//" + s3_url, get_where_defined("s3.url"))
+                _set_option("s3.url", f"//{s3_url}", get_where_defined("s3.url"))
 
     elif get_option("global.sharingMode") == "file" and not get_option(
         "global.developmentMode"

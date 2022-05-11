@@ -32,6 +32,6 @@ def marshall(proto, figure_or_dot):
     elif isinstance(figure_or_dot, str):
         dot = figure_or_dot
     else:
-        raise Exception("Unhandled type for graphviz chart: %s" % type(figure_or_dot))
+        raise Exception(f"Unhandled type for graphviz chart: {type(figure_or_dot)}")
 
     proto.spec = dot

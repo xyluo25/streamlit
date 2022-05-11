@@ -41,4 +41,4 @@ class S3StorageTest(unittest.TestCase):
         s3 = S3Storage()
         self.assertEqual(s3._url, None)
         idx = s3._web_app_url.index("/", 8)
-        self.assertEqual(s3._web_app_url[0:idx], "https://buckets.s3.amazonaws.com")
+        self.assertEqual(s3._web_app_url[:idx], "https://buckets.s3.amazonaws.com")

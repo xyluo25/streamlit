@@ -44,10 +44,8 @@ class AbstractStorage(object):
 
         self._static_dir = static_dir
         self._static_files = static_files
-        self._release_hash = "%s-%s" % (
-            streamlit.__version__,
-            base58.b58encode(md5.digest()[:3]).decode("utf-8"),
-        )
+        self._release_hash = f'{streamlit.__version__}-{base58.b58encode(md5.digest()[:3]).decode("utf-8")}'
+
         self._write_lock = locks.Lock()
 
     @gen.coroutine

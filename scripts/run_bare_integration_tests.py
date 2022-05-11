@@ -22,6 +22,7 @@ If any script exits with a non-zero status, this will also exit
 with a non-zero status.
 """
 
+
 import os
 import subprocess
 import sys
@@ -48,7 +49,7 @@ os.environ["MPLBACKEND"] = "Agg"
 try:
     import matplotlib
 except ImportError:
-    EXCLUDED_FILENAMES |= set(["empty_charts.py", "pyplot.py", "pyplot_kwargs.py"])
+    EXCLUDED_FILENAMES |= {"empty_charts.py", "pyplot.py", "pyplot_kwargs.py"}
 
 # magic.py uses the async keyword, which is Python 3.6+
 if IS_PYTHON_2 or IS_PYTHON_3_5:
@@ -56,10 +57,7 @@ if IS_PYTHON_2 or IS_PYTHON_3_5:
 
 
 def _command_to_string(command):
-    if isinstance(command, list):
-        return " ".join(command)
-    else:
-        return command
+    return " ".join(command) if isinstance(command, list) else command
 
 
 def _get_filenames(dir):
@@ -100,7 +98,7 @@ def run_commands(section_header, commands):
 
 def main():
     filenames = _get_filenames(E2E_DIR)
-    commands = ["python %s" % filename for filename in filenames]
+    commands = [f"python {filename}" for filename in filenames]
     failed = run_commands("bare scripts", commands)
 
     if len(failed) == 0:

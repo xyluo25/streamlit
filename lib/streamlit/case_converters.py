@@ -32,12 +32,11 @@ def to_lower_camel_case(snake_case_str):
         fooBar -> foobar
     """
     words = snake_case_str.split("_")
-    if len(words) > 1:
-        capitalized = [w.title() for w in words]
-        capitalized[0] = words[0]
-        return "".join(capitalized)
-    else:
+    if len(words) <= 1:
         return snake_case_str
+    capitalized = [w.title() for w in words]
+    capitalized[0] = words[0]
+    return "".join(capitalized)
 
 
 def to_snake_case(camel_case_str):
@@ -69,12 +68,9 @@ def convert_dict_keys(func, in_dict):
         converted by `func`.
 
     """
-    out_dict = dict()
+    out_dict = {}
     for k, v in in_dict.items():
         converted_key = func(k)
 
-        if type(v) is dict:
-            out_dict[converted_key] = convert_dict_keys(func, v)
-        else:
-            out_dict[converted_key] = v
+        out_dict[converted_key] = convert_dict_keys(func, v) if type(v) is dict else v
     return out_dict

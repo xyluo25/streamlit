@@ -15,6 +15,7 @@
 
 """Example of (almost) everything that's possible in streamlit."""
 
+
 # Python 2/3 compatibility
 from __future__ import print_function, division, unicode_literals, absolute_import
 from streamlit.compatibility import setup_2_3_shims
@@ -167,7 +168,7 @@ except Exception as e:
             " ~/.matplitlib/matplotlibrc. For more information, please see "
             '"Working with Matplotlib on OSX" in the Matplotlib FAQ.'
         )
-    st.warning("Error running matplotlib: " + err_str)
+    st.warning(f"Error running matplotlib: {err_str}")
 
 st.subheader("Vega-Lite")
 
@@ -202,7 +203,7 @@ def read_file_from_url(url):
     try:
         return requests.get(url).content
     except requests.exceptions.RequestException:
-        st.error("Unable to load file from %s. " "Is the internet connected?" % url)
+        st.error(f"Unable to load file from {url}. Is the internet connected?")
     except Exception as e:
         st.exception(e)
     return None
@@ -251,7 +252,7 @@ except ImportError as e:
         "this section will tell you how to use it."
     )
 
-    st.warning("Error running opencv: " + str(e))
+    st.warning(f"Error running opencv: {str(e)}")
 
 st.header("Inserting headers")
 

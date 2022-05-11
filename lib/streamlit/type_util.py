@@ -44,7 +44,7 @@ def is_type(obj, fqn_type_pattern):
     the_type = type(obj)
     module = the_type.__module__
     name = the_type.__name__
-    actual_fqn = "%s.%s" % (module, name)
+    actual_fqn = f"{module}.{name}"
     if isinstance(fqn_type_pattern, str):
         return fqn_type_pattern == actual_fqn
     else:

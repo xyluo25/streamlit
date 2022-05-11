@@ -291,8 +291,9 @@ class ScriptRunnerTest(unittest.TestCase):
         # Ensure that each runner's radio value is as expected.
         for ii, runner in enumerate(runners):
             self._assert_text_deltas(
-                runner, ["False", "ahoy!", "%s" % ii, "False", "loop_forever"]
+                runner, ["False", "ahoy!", f"{ii}", "False", "loop_forever"]
             )
+
             runner.enqueue_shutdown()
 
         time.sleep(0.1)

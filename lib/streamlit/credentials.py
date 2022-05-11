@@ -138,7 +138,7 @@ class Credentials(object):
         """
         try:
             self.load(auto_resolve)
-        except (Exception, RuntimeError) as e:
+        except Exception as e:
             _exit(str(e))
 
         if self.activation is None or not self.activation.is_valid:
@@ -157,7 +157,7 @@ class Credentials(object):
         try:
             os.remove(c._conf_file)
         except OSError as e:
-            LOGGER.error("Error removing credentials file: %s" % e)
+            LOGGER.error(f"Error removing credentials file: {e}")
 
     def save(self):
         """Save to toml file."""
@@ -228,7 +228,7 @@ def _verify_email(email: str) -> Activation:
     """
     email = email.strip()
 
-    if len(email) > 0 and email.count("@") != 1:
+    if email != '' and email.count("@") != 1:
         LOGGER.error("That doesn't look like an email :(")
         return Activation(None, False)
 

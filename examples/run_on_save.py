@@ -49,9 +49,9 @@ st.write("This should change every ", secs_to_wait, " seconds: ", random())
 status = st.empty()
 for i in range(secs_to_wait, 0, -1):
     time.sleep(1)
-    status.text("Sleeping %ss..." % i)
+    status.text(f"Sleeping {i}s...")
 
-status.text("Touching %s" % __file__)
+status.text(f"Touching {__file__}")
 
 platform_system = platform.system()
 
@@ -80,6 +80,6 @@ else:
 
 os.system(cmd)
 
-status.text("Touched %s" % __file__)
+status.text(f"Touched {__file__}")
 
 # MODIFIED AT: 1580332945.720056

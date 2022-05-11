@@ -52,9 +52,7 @@ class MediaFile(object):
 
     @property
     def url(self):
-        return "{}/{}.{}".format(
-            STATIC_MEDIA_ENDPOINT, self.file_id, self.mimetype.split("/")[1]
-        )
+        return f'{STATIC_MEDIA_ENDPOINT}/{self.file_id}.{self.mimetype.split("/")[1]}'
 
 
 class MediaFileManager(object):
@@ -94,7 +92,7 @@ class MediaFileManager(object):
         """
         file_id = _get_file_id(content, mimetype)
 
-        if not file_id in self._files:
+        if file_id not in self._files:
             new = MediaFile(file_id=file_id, content=content, mimetype=mimetype,)
             self._files[file_id] = new
         return self._files[file_id]

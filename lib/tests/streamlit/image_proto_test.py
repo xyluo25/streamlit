@@ -118,8 +118,9 @@ class ImageProtoTest(testutil.DeltaGeneratorTestCase):
         from streamlit.elements.image_proto import _np_array_to_bytes
 
         file_id = _get_file_id(
-            _np_array_to_bytes(data_in, format=format), mimetype="image/" + format
+            _np_array_to_bytes(data_in, format=format), mimetype=f"image/{format}"
         )
+
 
         st.image(data_in, format=format)
         imglist = self.get_delta_from_queue().new_element.imgs

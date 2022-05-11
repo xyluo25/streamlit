@@ -52,16 +52,15 @@ except ImportError:
 def get_file_watcher_class():
     watcher_type = config.get_option("server.fileWatcherType")
 
-    if watcher_type == "auto":
-        if watchdog_available:
-            return EventBasedFileWatcher
-        else:
-            from streamlit.watcher.PollingFileWatcher import PollingFileWatcher
-
-            return PollingFileWatcher
-    elif watcher_type == "watchdog" and watchdog_available:
+    if (
+        watcher_type == "auto"
+        and watchdog_available
+        or watcher_type != "auto"
+        and watcher_type == "watchdog"
+        and watchdog_available
+    ):
         return EventBasedFileWatcher
-    elif watcher_type == "poll":
+    elif watcher_type in ["auto", "poll"]:
         from streamlit.watcher.PollingFileWatcher import PollingFileWatcher
 
         return PollingFileWatcher

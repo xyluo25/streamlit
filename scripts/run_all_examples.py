@@ -94,12 +94,16 @@ def main():
 
     run_commands(
         "Caching",
-        ["streamlit cache clear", "streamlit run %s/caching.py" % EXAMPLE_DIR],
+        ["streamlit cache clear", f"streamlit run {EXAMPLE_DIR}/caching.py"],
     )
 
+
     run_commands(
-        "MNIST", ["streamlit run %s/mnist-cnn.py" % EXAMPLE_DIR], skip_last_input=True
+        "MNIST",
+        [f"streamlit run {EXAMPLE_DIR}/mnist-cnn.py"],
+        skip_last_input=True,
     )
+
 
     click.secho("\n\nCompleted all tests!", bold=True)
 

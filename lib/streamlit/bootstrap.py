@@ -195,7 +195,7 @@ def _print_url():
         ]
 
     click.secho("")
-    click.secho("  %s" % title_message, fg="blue", bold=True)
+    click.secho(f"  {title_message}", fg="blue", bold=True)
     click.secho("")
 
     for url_name, url in named_urls:

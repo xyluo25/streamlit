@@ -186,7 +186,7 @@ class _AddCopy(ast.NodeTransformer):
 
 
 def _get_mutated_output_error_message():
-    message = textwrap.dedent(
+    return textwrap.dedent(
         """
         **WARNING: Cached Object Mutated**
 
@@ -197,8 +197,6 @@ def _get_mutated_output_error_message():
         (https://docs.streamlit.io/advanced_caching.html)
         """
     ).strip("\n")
-
-    return message
 
 
 def _read_from_mem_cache(key, allow_output_mutation, hash_funcs):
@@ -229,7 +227,7 @@ def _write_to_mem_cache(key, value, allow_output_mutation, hash_funcs):
 
 
 def _read_from_disk_cache(key):
-    path = file_util.get_streamlit_file_path("cache", "%s.pickle" % key)
+    path = file_util.get_streamlit_file_path("cache", f"{key}.pickle")
     try:
         with file_util.streamlit_read(path, binary=True) as input:
             entry = pickle.load(input)
@@ -237,30 +235,26 @@ def _read_from_disk_cache(key):
             LOGGER.debug("Disk cache HIT: %s", type(value))
     except util.Error as e:
         LOGGER.error(e)
-        raise CacheError("Unable to read from cache: %s" % e)
+        raise CacheError(f"Unable to read from cache: {e}")
 
-    except (OSError, FileNotFoundError):  # Python 2  # Python 3
+    except OSError:
         raise CacheKeyNotFoundError("Key not found in disk cache")
     return value
 
 
 def _write_to_disk_cache(key, value):
-    path = file_util.get_streamlit_file_path("cache", "%s.pickle" % key)
+    path = file_util.get_streamlit_file_path("cache", f"{key}.pickle")
 
     try:
         with file_util.streamlit_write(path, binary=True) as output:
             entry = DiskCacheEntry(value=value)
             pickle.dump(entry, output, pickle.HIGHEST_PROTOCOL)
-    # In python 2, it's pickle struct error.
-    # In python 3, it's an open error in util.
     except (util.Error, struct.error) as e:
         LOGGER.debug(e)
         # Clean up file so we don't leave zero byte files.
-        try:
+        with contextlib.suppress(IOError, OSError):
             os.remove(path)
-        except (FileNotFoundError, IOError, OSError):
-            pass
-        raise CacheError("Unable to write to cache: %s" % e)
+        raise CacheError(f"Unable to write to cache: {e}")
 
 
 def _read_from_cache(
@@ -586,7 +580,7 @@ class Cache(Dict[Any, Any]):
 
     def __getattr__(self, key):
         if key not in self:
-            raise AttributeError("Cache has no atribute %s" % key)
+            raise AttributeError(f"Cache has no atribute {key}")
         return self.__getitem__(key)
 
     def __setattr__(self, key, value):

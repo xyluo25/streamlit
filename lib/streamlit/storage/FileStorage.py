@@ -71,14 +71,12 @@ class FileStorage(AbstractStorage):
                     yield
 
         LOGGER.debug("Done writing files!")
-        raise gen.Return("index.html?id=%s" % report_id)
+        raise gen.Return(f"index.html?id={report_id}")
 
 
 def _recursively_create_folder(path):
     try:
         os.makedirs(path)
     except OSError as e:
-        if e.errno == errno.EEXIST and os.path.isdir(path):
-            pass
-        else:
+        if e.errno != errno.EEXIST or not os.path.isdir(path):
             raise e

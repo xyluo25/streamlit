@@ -50,20 +50,14 @@ class ShowTest(unittest.TestCase):
                 write.assert_called_once()
                 markdown.assert_called_once()
 
-    @parameterized.expand(
-        [
-            ("simple", "(a, b, c)", range(0, 3), ["a", "b", "c"]),
-            ("complex", "(a, foo(c))", range(0, 2), ["a", "foo(c)"]),
-            ("tricky", "get(a, foo(c)) trash", range(0, 2), ["a", "foo(c)"]),
-        ]
-    )
+    @parameterized.expand([("simple", "(a, b, c)", range(3), ["a", "b", "c"]), ("complex", "(a, foo(c))", range(2), ["a", "foo(c)"]), ("tricky", "get(a, foo(c)) trash", range(2), ["a", "foo(c)"])])
     def test_get_method_args_from_code(self, name, input, args, expected):
         """Parse method arguments from a string"""
         parsed = code_util.get_method_args_from_code(args, input)
 
         self.assertEqual(parsed, expected)
 
-    @parameterized.expand([("fails", '(a, ")b", c)', range(0, 3), ["a", '")b"', "c"])])
+    @parameterized.expand([("fails", '(a, ")b", c)', range(3), ["a", '")b"', "c"])])
     def test_failed_get_args_from_code(self, name, input, args, expected):
         """Fail to parse method arguments from a string
 

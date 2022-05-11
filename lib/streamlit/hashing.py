@@ -106,19 +106,15 @@ def _get_context(func) -> Context:
     code = func.__code__  # type: types.CodeType
     # Mapping from variable name to the value if we can resolve it.
     # Otherwise map to the name.
-    cells = {}
-    for var in code.co_cellvars:
-        cells[var] = var  # Instead of value, we use the name.
+    cells = {var: var for var in code.co_cellvars}
     if code.co_freevars:
         assert len(code.co_freevars) == len(func.__closure__)
-        cells.update(
-            zip(code.co_freevars, map(lambda c: c.cell_contents, func.__closure__))  # type: ignore[no-any-return]
+        cells |= zip(
+            code.co_freevars, map(lambda c: c.cell_contents, func.__closure__)
         )
 
-    varnames = {}
-    if inspect.ismethod(func):
-        varnames = {"self": func.__self__}
 
+    varnames = {"self": func.__self__} if inspect.ismethod(func) else {}
     return Context(globals=func.__globals__, cells=cells, varnames=varnames)
 
 
@@ -130,12 +126,11 @@ def get_hash(f, context=None, hash_funcs=None):
 
 
 def _int_to_bytes(i):
-    if hasattr(i, "to_bytes"):
-        num_bytes = (i.bit_length() + 8) // 8
-        return i.to_bytes(num_bytes, "little", signed=True)
-    else:
+    if not hasattr(i, "to_bytes"):
         # For Python 2
         return b"int:" + str(i).encode()
+    num_bytes = (i.bit_length() + 8) // 8
+    return i.to_bytes(num_bytes, "little", signed=True)
 
 
 def _key(obj, context):
@@ -248,7 +243,7 @@ class CodeHasher:
     """A hasher that can hash code objects including dependencies."""
 
     def __init__(self, name="md5", hasher=None, hash_funcs=None):
-        self.hashes = dict()
+        self.hashes = {}
 
         self.name = name
 
@@ -258,11 +253,7 @@ class CodeHasher:
         # An ever increasing counter.
         self._counter = 0
 
-        if hasher:
-            self.hasher = hasher
-        else:
-            self.hasher = hashlib.new(name)
-
+        self.hasher = hasher or hashlib.new(name)
         self._folder_black_list = FolderBlackList(
             config.get_option("server.folderWatchBlacklist")
         )
@@ -319,9 +310,7 @@ class CodeHasher:
 
     def _file_should_be_hashed(self, filename):
         filepath = os.path.abspath(filename)
-        file_is_blacklisted = self._folder_black_list.is_blacklisted(filepath)
-        # Short circuiting for performance.
-        if file_is_blacklisted:
+        if file_is_blacklisted := self._folder_black_list.is_blacklisted(filepath):
             return False
         return file_util.file_is_in_folder_glob(
             filepath, self._get_main_script_directory()
@@ -337,7 +326,7 @@ class CodeHasher:
                 # MagicMock can result in objects that appear to be infinitely
                 # deep, so we don't try to hash them at all.
                 return self.to_bytes(id(obj))
-            elif isinstance(obj, bytes) or isinstance(obj, bytearray):
+            elif isinstance(obj, (bytes, bytearray)):
                 return obj
             elif isinstance(obj, str):
                 return obj.encode()
@@ -354,7 +343,7 @@ class CodeHasher:
                 return self.to_bytes(hash(obj))
             elif isinstance(obj, int):
                 return _int_to_bytes(obj)
-            elif isinstance(obj, list) or isinstance(obj, tuple):
+            elif isinstance(obj, (list, tuple)):
                 h = hashlib.new(self.name)
 
                 # Hash the name of the container so that ["a"] hashes differently from ("a",)
@@ -406,10 +395,8 @@ class CodeHasher:
                 return h.digest()
             elif inspect.isbuiltin(obj):
                 return self.to_bytes(obj.__name__)
-            elif hasattr(obj, "name") and (
-                isinstance(obj, io.IOBase)
-                # Handle temporary files used during testing
-                or isinstance(obj, tempfile._TemporaryFileWrapper)  # type: ignore[attr-defined]
+            elif hasattr(obj, "name") and isinstance(
+                obj, (io.IOBase, tempfile._TemporaryFileWrapper)
             ):
                 # Hash files as name + last modification date + offset.
                 h = hashlib.new(self.name)
@@ -421,7 +408,7 @@ class CodeHasher:
             elif type_util.is_type(obj, "numpy.ufunc"):
                 # For object of type numpy.ufunc returns ufunc:<object name>
                 # For example, for numpy.remainder, this is ufunc:remainder
-                return ("%s:%s" % (obj.__class__.__name__, obj.__name__)).encode()
+                return f"{obj.__class__.__name__}:{obj.__name__}".encode()
             elif inspect.isroutine(obj):
                 if hasattr(obj, "__wrapped__"):
                     # Ignore the wrapper of wrapped functions.
@@ -430,7 +417,7 @@ class CodeHasher:
                 if obj.__module__.startswith("streamlit"):
                     # Ignore streamlit modules even if they are in the CWD
                     # (e.g. during development).
-                    return self.to_bytes("%s.%s" % (obj.__module__, obj.__name__))
+                    return self.to_bytes(f"{obj.__module__}.{obj.__name__}")
 
                 h = hashlib.new(self.name)
                 if self._file_should_be_hashed(obj.__code__.co_filename):

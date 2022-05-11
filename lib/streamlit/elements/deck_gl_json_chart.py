@@ -21,11 +21,7 @@ EMPTY_MAP = {"initialViewState": {"latitude": 0, "longitude": 0, "pitch": 0, "zo
 
 
 def marshall(element, pydeck_obj):
-    if pydeck_obj is None:
-        spec = json.dumps(EMPTY_MAP)
-    else:
-        spec = pydeck_obj.to_json()
-
+    spec = json.dumps(EMPTY_MAP) if pydeck_obj is None else pydeck_obj.to_json()
     element.deck_gl_json_chart.json = spec
 
     if pydeck_obj is not None and isinstance(pydeck_obj.deck_widget.tooltip, dict):

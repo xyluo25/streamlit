@@ -50,14 +50,14 @@ NEW_VERSION_TEXT = """
 
 def _convert_config_option_to_click_option(config_option):
     """Composes given config option options as options for click lib."""
-    option = "--{}".format(config_option.key)
+    option = f"--{config_option.key}"
     param = config_option.key.replace(".", "_")
     description = config_option.description
     if config_option.deprecated:
         description += "\n {} - {}".format(
             config_option.deprecation_text, config_option.deprecation_date
         )
-    envvar = "STREAMLIT_{}".format(to_snake_case(param).upper())
+    envvar = f"STREAMLIT_{to_snake_case(param).upper()}"
 
     return {
         "param": param,
@@ -183,7 +183,7 @@ def main_hello(**kwargs):
     # For Python 2 when Streamlit is actually installed (make install rather
     # than make develop).
     if filename.endswith(".pyc"):
-        filename = "%s.py" % filename[:-4]
+        filename = f"{filename[:-4]}.py"
 
     _main_run(filename)
 
@@ -223,10 +223,10 @@ def main_run(target, args=None, **kwargs):
             target = url_util.process_gitblob_url(target)
             _download_remote(script_path, target)
             _main_run(script_path, args)
-    else:
-        if not os.path.exists(target):
-            raise click.BadParameter("File does not exist: {}".format(target))
+    elif os.path.exists(target):
         _main_run(target, args)
+    else:
+        raise click.BadParameter(f"File does not exist: {target}")
 
 
 # Utility function to compute the command line as a string
@@ -274,9 +274,9 @@ def cache_clear():
     result = streamlit.caching.clear_cache()
     cache_path = streamlit.caching.get_cache_path()
     if result:
-        print("Cleared directory %s." % cache_path)
+        print(f"Cleared directory {cache_path}.")
     else:
-        print("Nothing to clear at %s." % cache_path)
+        print(f"Nothing to clear at {cache_path}.")
 
 
 # SUBCOMMAND: config

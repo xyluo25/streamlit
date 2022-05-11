@@ -474,7 +474,7 @@ def show(*args):
         for idx, input in enumerate(inputs):
             escaped = _string_util.escape_markdown(input)
 
-            markdown("**%s**" % escaped)
+            markdown(f"**{escaped}**")
             write(args[idx])
 
     except Exception:
@@ -573,7 +573,7 @@ def echo():
         code.code(line_to_display, "python")
 
     except FileNotFoundError as err:
-        code.warning("Unable to display code. %s" % err)
+        code.warning(f"Unable to display code. {err}")
 
 
 def _transparent_write(*args):

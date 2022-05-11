@@ -397,7 +397,7 @@ class ConfigTest(unittest.TestCase):
         relative_url = "relative.url"
         config._set_option("s3.url", relative_url, "test")
         config._check_conflicts()
-        self.assertEqual("//" + relative_url, config.get_option("s3.url"))
+        self.assertEqual(f"//{relative_url}", config.get_option("s3.url"))
 
     def test_maybe_convert_to_number(self):
         self.assertEqual(1234, config._maybe_convert_to_number("1234"))

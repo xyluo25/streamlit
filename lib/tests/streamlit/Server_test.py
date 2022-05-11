@@ -348,8 +348,9 @@ class ServerTest(ServerTestCase):
         """Create a mock ReportSession. Each mocked instance will have
         its own unique ID."""
         mock_id = mock.PropertyMock(
-            return_value="mock_id:%s" % ServerTest._next_report_id
+            return_value=f"mock_id:{ServerTest._next_report_id}"
         )
+
         ServerTest._next_report_id += 1
 
         mock_session = mock.MagicMock(ReportSession, autospec=True, *args, **kwargs)
@@ -532,7 +533,7 @@ class MessageCacheHandlerTest(tornado.testing.AsyncHTTPTestCase):
         self._cache.add_message(msg, MagicMock(), 0)
 
         # Cache hit
-        response = self.fetch("/message?hash=%s" % msg_hash)
+        response = self.fetch(f"/message?hash={msg_hash}")
         self.assertEqual(200, response.code)
         self.assertEqual(serialize_forward_msg(msg), response.body)
 

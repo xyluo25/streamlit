@@ -15,6 +15,7 @@
 
 """Streamlit support for Plotly charts."""
 
+
 import json
 import urllib.parse
 
@@ -25,18 +26,7 @@ from streamlit.logger import get_logger
 
 LOGGER = get_logger(__name__)
 
-SHARING_MODES = set(
-    [
-        # This means the plot will be sent to the Streamlit app rather than to
-        # Plotly.
-        "streamlit",
-        # The three modes below are for plots that should be hosted in Plotly.
-        # These are the names Plotly uses for them.
-        "private",
-        "public",
-        "secret",
-    ]
-)
+SHARING_MODES = {"streamlit", "private", "public", "secret"}
 
 
 def marshall(proto, figure_or_data, use_container_width, sharing, **kwargs):
@@ -59,7 +49,7 @@ def marshall(proto, figure_or_data, use_container_width, sharing, **kwargs):
         )
 
     if not isinstance(sharing, str) or sharing.lower() not in SHARING_MODES:
-        raise ValueError("Invalid sharing mode for Plotly chart: %s" % sharing)
+        raise ValueError(f"Invalid sharing mode for Plotly chart: {sharing}")
 
     proto.use_container_width = use_container_width
 
@@ -104,6 +94,6 @@ def _get_embed_url(url):
     # (Note that our use namedtuple._replace is fine because that's not a
     # private method! It just has an underscore to avoid clashing with the
     # tuple field names)
-    parsed_embed_url = parsed_url._replace(path=parsed_url.path + ".embed")
+    parsed_embed_url = parsed_url._replace(path=f"{parsed_url.path}.embed")
 
     return urllib.parse.urlunparse(parsed_embed_url)

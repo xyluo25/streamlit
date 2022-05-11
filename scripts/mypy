@@ -88,8 +88,8 @@ def process_report(path: str) -> None:
 
     print(Module.header())
     for module in sorted(modules, key=lambda m: m.name):
-        print(str(module))
-    print(str(totals))
+        print(module)
+    print(totals)
 
 
 @click.command()
@@ -97,25 +97,29 @@ def process_report(path: str) -> None:
 def main(report: bool = False) -> None:
     if mypy.version.__version__ != MYPY_VERSION:
         print(
-            "Mypy version %s required, found %s"
-            % (MYPY_VERSION, mypy.version.__version__),
+            f"Mypy version {MYPY_VERSION} required, found {mypy.version.__version__}",
             file=sys.stderr,
         )
+
         sys.exit(1)
 
     paths = []  # type: List[str]
     for path in PATHS:
         if "*" in path:
-            for filename in glob.glob(path):
-                if not (filename in EXCLUDE_FILES or filename.endswith(".sh")):
-                    paths.append(filename)
+            paths.extend(
+                filename
+                for filename in glob.glob(path)
+                if filename not in EXCLUDE_FILES
+                and not filename.endswith(".sh")
+            )
+
         else:
             paths.append(path)
 
     args = ["--config-file=lib/mypy.ini"]
     if report:
         tempdir = tempfile.TemporaryDirectory()
-        args.append("--lineprecision-report=%s" % tempdir.name)
+        args.append(f"--lineprecision-report={tempdir.name}")
     args.append("--")
     args.extend(paths)
 

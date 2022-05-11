@@ -17,13 +17,13 @@ import streamlit as st
 
 options = ("male", "female")
 i1 = st.multiselect("selectbox 1", options)
-st.text("value 1: %s" % i1)
+st.text(f"value 1: {i1}")
 
 i2 = st.multiselect("selectbox 2", options, format_func=lambda x: x.capitalize())
-st.text("value 2: %s" % i2)
+st.text(f"value 2: {i2}")
 
 i3 = st.multiselect("selectbox 3", [])
-st.text("value 3: %s" % i3)
+st.text(f"value 3: {i3}")
 
 i4 = st.multiselect("selectbox 4", ["coffee", "tea", "water"], ["tea", "water"])
-st.text("value 4: %s" % i4)
+st.text(f"value 4: {i4}")

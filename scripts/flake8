@@ -16,6 +16,7 @@
 
 """Invoke flake8 tool with patch to incorporate pyflakes fa92556c."""
 
+
 import re
 
 import pyflakes.checker
@@ -24,6 +25,8 @@ from flake8.main import cli
 # Apply important parts of fa92556c.
 ASCII_NON_ALNUM = ''.join([chr(i) for i in range(128) if not chr(i).isalnum()])
 pyflakes.checker.TYPE_IGNORE_RE = re.compile(
-    pyflakes.checker.TYPE_COMMENT_RE.pattern + r'ignore([{}]|$)'.format(ASCII_NON_ALNUM))
+    pyflakes.checker.TYPE_COMMENT_RE.pattern + f'ignore([{ASCII_NON_ALNUM}]|$)'
+)
+
 
 cli.main()
